@@ -1,0 +1,283 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Farmaloop — Catálogo SEO</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💊</text></svg>">
+</head>
+<body>
+  <div id="app">
+    <!-- Sidebar -->
+    <aside id="sidebar">
+      <div class="sidebar-header">
+        <h1>Farmaloop</h1>
+        <span class="badge">SEO Segunda Etapa</span>
+      </div>
+
+      <div class="stats-cards" id="statsCards">
+        <div class="stat-card" data-color="info">
+          <span class="stat-number" id="statTotal">0</span>
+          <span class="stat-label">Total</span>
+        </div>
+        <div class="stat-card" data-color="success">
+          <span class="stat-number" id="statOptimizados">0</span>
+          <span class="stat-label">Optimizados</span>
+        </div>
+        <div class="stat-card" data-color="danger">
+          <span class="stat-number" id="statPendientes">0</span>
+          <span class="stat-label">Pendientes</span>
+        </div>
+        <div class="stat-card" data-color="warning">
+          <span class="stat-number" id="statRevisar">0</span>
+          <span class="stat-label">Revisar</span>
+        </div>
+        <div class="stat-card" data-color="primary">
+          <span class="stat-number" id="statStock">0</span>
+          <span class="stat-label">Con Stock</span>
+        </div>
+      </div>
+
+      <div class="progress-section">
+        <div class="progress-label">
+          <span>Avance general</span>
+          <span id="progressPercent">0%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <nav id="categoryNav">
+        <h3>Categorías</h3>
+        <ul id="categoryList">
+          <li data-category="todas" class="active">Todas</li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main -->
+    <main id="main">
+      <!-- Top Nav -->
+      <nav id="topNav">
+        <button class="nav-tab active" data-tab="catalogo">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          Catálogo
+        </button>
+        <button class="nav-tab" data-tab="sprint">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Sprint
+        </button>
+        <button class="nav-tab" data-tab="objetivos">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          Objetivos
+        </button>
+      </nav>
+
+      <!-- ==================== VIEW: CATÁLOGO ==================== -->
+      <div id="view-catalogo" class="view active">
+        <header id="mainHeader">
+          <div class="header-top">
+            <h2 id="currentCategory">Todas las categorías</h2>
+            <div class="header-actions">
+              <button id="btnExport" class="btn btn-outline" title="Exportar a Excel">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Exportar Excel
+              </button>
+              <button id="btnImport" class="btn btn-outline" title="Importar Excel corregido">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Importar Excel
+              </button>
+              <input type="file" id="fileInput" accept=".xlsx" style="display:none">
+            </div>
+          </div>
+
+          <div class="filters">
+            <div class="search-box">
+              <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="searchInput" placeholder="Buscar por nombre, SKU o principio activo...">
+            </div>
+            <select id="estadoFilter">
+              <option value="todos">Todos los estados</option>
+              <option value="pendiente">🙈 Pendiente</option>
+              <option value="qa completo">✅ QA Completo</option>
+              <option value="qa incompleto">🔄 QA Incompleto</option>
+              <option value="prod completo">🚀 PROD Completo</option>
+              <option value="prod incompleto">⚠️ PROD Incompleto</option>
+            </select>
+          </div>
+        </header>
+
+        <!-- Edit Panel -->
+        <div id="editPanel" class="hidden">
+          <div class="edit-panel-header">
+            <h3 id="editProductName">Editar producto</h3>
+            <button id="btnCloseEdit" class="btn btn-sm btn-ghost">✕</button>
+          </div>
+          <div class="edit-panel-body">
+            <input type="hidden" id="editId">
+
+            <div class="form-row">
+              <label>Title SEO</label>
+              <input type="text" id="editTitle" maxlength="60" placeholder="Máx. 60 caracteres">
+              <span class="char-count" id="titleCount">0/60</span>
+            </div>
+
+            <div class="form-row">
+              <label>Meta Description</label>
+              <textarea id="editMetaDesc" maxlength="160" rows="2" placeholder="Máx. 160 caracteres"></textarea>
+              <span class="char-count" id="metaCount">0/160</span>
+            </div>
+
+            <div class="form-row">
+              <label>Principio Activo</label>
+              <input type="text" id="editPrincipio" placeholder="Ej: Sibutramina">
+            </div>
+
+            <div class="form-row">
+              <label>Presentación</label>
+              <input type="text" id="editPresentacion" placeholder="Ej: 15mg x 30 cápsulas">
+            </div>
+
+            <div class="form-row">
+              <label>Link Laboratorio</label>
+              <input type="url" id="editLabLink" placeholder="https://...">
+            </div>
+
+            <div class="form-row">
+              <label>Keywords Ocultos</label>
+              <textarea id="editKeywords" rows="2" placeholder="Keywords separadas por coma"></textarea>
+            </div>
+
+            <div class="form-row">
+              <label>Bullets de Atributos</label>
+              <textarea id="editBullets" rows="3" placeholder="Un bullet por línea&#10;• Principio activo: X&#10;• Indicación: Y"></textarea>
+            </div>
+
+            <div class="form-row">
+              <label>Registro ISP</label>
+              <input type="text" id="editRegistro" placeholder="Ej: F-12345/24">
+            </div>
+
+            <div class="form-row">
+              <label>Estado</label>
+              <select id="editEstado">
+                <option value="pendiente">🙈 Pendiente</option>
+                <option value="qa completo">✅ QA Completo</option>
+                <option value="qa incompleto">🔄 QA Incompleto</option>
+                <option value="prod completo">🚀 PROD Completo</option>
+                <option value="prod incompleto">⚠️ PROD Incompleto</option>
+              </select>
+            </div>
+
+            <div class="form-row">
+              <label>Notas</label>
+              <textarea id="editNotas" rows="2" placeholder="Notas internas..."></textarea>
+            </div>
+
+            <div class="form-row form-full">
+              <label>Descripción Intranet (copiar y pegar)</label>
+              <textarea id="editIntranetDesc" rows="6" readonly placeholder="Texto completo para pegar en la intranet..."></textarea>
+            </div>
+
+            <div class="edit-actions">
+              <button id="btnSaveEdit" class="btn btn-primary">Guardar</button>
+              <button id="btnCancelEdit" class="btn btn-ghost">Cancelar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div id="tableContainer">
+          <div id="tableHeader">
+            <span id="resultCount">Cargando productos...</span>
+          </div>
+          <div id="tableWrapper">
+            <table id="productsTable">
+              <thead>
+                <tr>
+                  <th class="col-sku">SKU</th>
+                  <th class="col-name">Producto</th>
+                  <th class="col-category">Categoría</th>
+                  <th class="col-stock">Stock</th>
+                  <th class="col-principle">Principio Activo</th>
+                  <th class="col-status">Estado</th>
+                  <th class="col-intranet">Intranet</th>
+                  <th class="col-qa">QA</th>
+                  <th class="col-actions">Acción</th>
+                  <th class="col-copy"></th>
+                </tr>
+              </thead>
+              <tbody id="productsBody">
+                <tr><td colspan="10" class="loading">Cargando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div id="pagination">
+            <button id="prevPage" class="btn btn-sm" disabled>← Anterior</button>
+            <span id="pageInfo">Página 1 de 1</span>
+            <button id="nextPage" class="btn btn-sm">Siguiente →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== VIEW: SPRINT ==================== -->
+      <div id="view-sprint" class="view">
+        <div id="sprintContent">
+          <div class="loading">Cargando sprint...</div>
+        </div>
+      </div>
+
+      <!-- ==================== VIEW: OBJETIVOS ==================== -->
+      <div id="view-objetivos" class="view">
+        <div id="objetivosContent">
+          <div class="loading">Cargando objetivos...</div>
+        </div>
+      </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal: Editar Objetivos -->
+  <div id="objModal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Editar Objetivos</h3>
+        <button id="btnCloseModal" class="btn btn-sm btn-ghost">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <label>Meta de visitas</label>
+          <input type="number" id="cfgMetaVisitas" min="0" step="1000">
+        </div>
+        <div class="form-row">
+          <label>Visitas actuales</label>
+          <input type="number" id="cfgVisitasActuales" min="0" step="1000">
+        </div>
+        <div class="form-row">
+          <label>Inicio del proyecto</label>
+          <input type="date" id="cfgInicioProyecto">
+        </div>
+        <div class="form-row">
+          <label>Fee mensual ($)</label>
+          <input type="number" id="cfgFeeMensual" min="0" step="1000">
+        </div>
+        <div class="form-row">
+          <label>Sprint actual (1-8)</label>
+          <input type="number" id="cfgSprintActual" min="1" max="8">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btnSaveConfig" class="btn btn-primary">Guardar</button>
+        <button id="btnCancelConfig" class="btn btn-ghost">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+

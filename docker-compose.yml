@@ -1,0 +1,38 @@
+services:
+  db:
+    image: mariadb:11
+    container_name: farmaloop-db
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: farmaloop_root
+      MARIADB_DATABASE: farmaloop_seo
+      MARIADB_USER: seo_user
+      MARIADB_PASSWORD: seo_pass_2026
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+      - ./scripts/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-pfarmaloop_root"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build: .
+    container_name: farmaloop-crud
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: seo_user
+      DB_PASSWORD: seo_pass_2026
+      DB_NAME: farmaloop_seo
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./data:/app/data
