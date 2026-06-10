@@ -825,6 +825,26 @@ function debounce(fn, ms) {
 }
 
 // ─── Init ────────────────────────────────────────────────────────────────────
+// ─── Theme toggle ─────────────────────────────────────────────────────────────
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = { dark: '☀️', light: '🌙' };
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  if (themeToggle) themeToggle.textContent = themeIcon[theme] || '🌙';
+  localStorage.setItem('theme', theme);
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'light';
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+}
+
+// Cargar tema guardado
+const saved = localStorage.getItem('theme') || 'light';
+applyTheme(saved);
+if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
+
 async function init() {
   await loadStats();
   await loadCategories();
