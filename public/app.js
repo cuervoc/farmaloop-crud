@@ -242,6 +242,28 @@ function renderSkeleton(rows = 5) {
   return html;
 }
 
+// ─── Seguimiento de copiados ──────────────────────────────────────────────────
+function getCopiados() {
+  try { return new Set(JSON.parse(localStorage.getItem('copiados') || '[]')); }
+  catch { return new Set(); }
+}
+function addCopiado(sku) {
+  const s = getCopiados();
+  s.add(String(sku));
+  localStorage.setItem('copiados', JSON.stringify([...s]));
+}
+function updateCopyProgress() {
+  const total = state.products.length;
+  const copiados = getCopiados();
+  let count = 0;
+  state.products.forEach(p => { if (copiados.has(String(p.sku))) count++; });
+  const el = document.getElementById('copyProgress');
+  if (el) {
+    el.textContent = total > 0 ? `📋 ${count}/${total}` : '';
+    el.title = `${count} de ${total} productos copiados`;
+  }
+}
+
 function renderProducts() {
   if (state.products.length === 0) {
     const isFiltered = state.currentCategory !== 'todas' || state.currentEstado !== 'todos' || state.search;
