@@ -441,6 +441,9 @@ body {
   font-size: 0.85rem;
   color: var(--text-muted);
   background: var(--border-light);
+  padding: 3px 10px;
+  border-radius: 12px;
+}
 /* Global progress bar */
 .sprint-global-progress {
   display: flex;
