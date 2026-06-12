@@ -267,18 +267,18 @@ app.get('/api/sprint', async (req, res) => {
   try {
     // Stats globales (productos del Bloque 1)
     const [total] = await query('SELECT COUNT(*) as total FROM products');
-    const [qaProd] = await query("SELECT COUNT(*) as total FROM products WHERE estado IN ('qa completo','prod completo','prod incompleto')");
-    const [enProd] = await query("SELECT COUNT(*) as total FROM products WHERE estado IN ('prod completo','prod incompleto')");
-    const [completado] = await query("SELECT COUNT(*) as total FROM products WHERE estado = 'prod completo'");
+    const [qaIntranet] = await query("SELECT COUNT(*) as total FROM products WHERE estado_intranet IN ('ingresado qa','ingresado prod','completado')");
+    const [prodIntranet] = await query("SELECT COUNT(*) as total FROM products WHERE estado_intranet IN ('ingresado prod','completado')");
+    const [completadoIntranet] = await query("SELECT COUNT(*) as total FROM products WHERE estado_intranet = 'completado'");
 
     // Stats por categoría prioritaria
     const placeholders = PRIORITY_CATEGORIES.map(() => '?').join(',');
     const catStats = await query(
       `SELECT subCategory as name, COUNT(*) as total,
-              CAST(SUM(CASE WHEN estado IN ('qa completo','prod completo','prod incompleto') THEN 1 ELSE 0 END) AS UNSIGNED) as en_qa,
-              CAST(SUM(CASE WHEN estado IN ('prod completo','prod incompleto') THEN 1 ELSE 0 END) AS UNSIGNED) as en_prod,
-              CAST(SUM(CASE WHEN estado = 'prod completo' THEN 1 ELSE 0 END) AS UNSIGNED) as completado,
-              CAST(SUM(CASE WHEN estado = 'pendiente' OR estado IS NULL THEN 1 ELSE 0 END) AS UNSIGNED) as pendientes
+              CAST(SUM(CASE WHEN estado_intranet IN ('ingresado qa','ingresado prod','completado') THEN 1 ELSE 0 END) AS UNSIGNED) as en_qa,
+              CAST(SUM(CASE WHEN estado_intranet IN ('ingresado prod','completado') THEN 1 ELSE 0 END) AS UNSIGNED) as en_prod,
+              CAST(SUM(CASE WHEN estado_intranet = 'completado' THEN 1 ELSE 0 END) AS UNSIGNED) as completado,
+              CAST(SUM(CASE WHEN estado_intranet = 'pendiente' OR estado_intranet IS NULL THEN 1 ELSE 0 END) AS UNSIGNED) as pendientes
        FROM products
        WHERE subCategory IN (${placeholders})
        GROUP BY subCategory`,
@@ -331,12 +331,12 @@ app.get('/api/sprint', async (req, res) => {
       currentWeek,
       totalWeeks: 8,
       totalProducts: total.total,
-      enQA: qaProd.total,
-      enPROD: enProd.total,
-      completado: completado.total,
-      globalPctQA: total.total > 0 ? Math.round((qaProd.total / total.total) * 100) : 0,
-      globalPctPROD: total.total > 0 ? Math.round((enProd.total / total.total) * 100) : 0,
-      globalPctComp: total.total > 0 ? Math.round((completado.total / total.total) * 100) : 0,
+      enQA: qaIntranet.total,
+      enPROD: prodIntranet.total,
+      completado: completadoIntranet.total,
+      globalPctQA: total.total > 0 ? Math.round((qaIntranet.total / total.total) * 100) : 0,
+      globalPctPROD: total.total > 0 ? Math.round((prodIntranet.total / total.total) * 100) : 0,
+      globalPctComp: total.total > 0 ? Math.round((completadoIntranet.total / total.total) * 100) : 0,
       timeline,
       categoryStats: catStats,
       priorityCategories: PRIORITY_CATEGORIES,

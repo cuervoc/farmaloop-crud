@@ -404,13 +404,13 @@ function renderSprint() {
     <div class="sprint-global-progress">
       <div class="sprint-gp-left">
         <div class="sprint-gp-number">${d.completado}</div>
-        <div class="sprint-gp-label">completados</div>
+        <div class="sprint-gp-label">completados intranet</div>
       </div>
       <div class="sprint-gp-center">
         <div class="sprint-triple-bars">
           <div class="triple-bar-row">
             <span class="triple-bar-icon">🟡</span>
-            <span class="triple-bar-label">QA</span>
+            <span class="triple-bar-label">Intranet QA</span>
             <div class="triple-bar-track">
               <div class="triple-bar-fill fill-qa" style="width: ${d.globalPctQA}%"></div>
             </div>
@@ -419,7 +419,7 @@ function renderSprint() {
           </div>
           <div class="triple-bar-row">
             <span class="triple-bar-icon">🔵</span>
-            <span class="triple-bar-label">PROD</span>
+            <span class="triple-bar-label">Intranet PROD</span>
             <div class="triple-bar-track">
               <div class="triple-bar-fill fill-prod" style="width: ${d.globalPctPROD}%"></div>
             </div>
@@ -428,7 +428,7 @@ function renderSprint() {
           </div>
           <div class="triple-bar-row">
             <span class="triple-bar-icon">🟢</span>
-            <span class="triple-bar-label">Completado</span>
+            <span class="triple-bar-label">Intranet OK</span>
             <div class="triple-bar-track">
               <div class="triple-bar-fill fill-comp" style="width: ${d.globalPctComp}%"></div>
             </div>
@@ -440,7 +440,7 @@ function renderSprint() {
       </div>
       <div class="sprint-gp-right">
         <div class="sprint-gp-number">${d.totalProducts - d.enQA}</div>
-        <div class="sprint-gp-label">pendientes</div>
+        <div class="sprint-gp-label">pendientes intranet</div>
       </div>
     </div>
   `;
@@ -464,7 +464,7 @@ function renderSprint() {
           <div class="tl-minibar"><span class="tl-mini-dot fill-comp"></span><span class="tl-mini-pct">${s.pct_comp}%</span></div>
         </div>
         <div class="tl-stats">
-          ${s.week === 8 ? '—' : `${s.en_qa}/${s.total} QA · ${s.completado} OK`}
+          ${s.week === 8 ? '—' : `${s.en_qa}/${s.total} QA Intranet · ${s.completado} OK`}
         </div>
       </div>`;
   });
@@ -473,13 +473,13 @@ function renderSprint() {
   // Categorías priorizadas con QA/PROD/Completado
   html += `<div class="sprint-categories"><h3>📦 Categorías Priorizadas</h3><div class="sprint-cat-table">`;
   html += `
-    <div class="sprint-cat-row sprint-cat-header">
+      <div class="sprint-cat-row sprint-cat-header">
       <span class="sct-name">Categoría</span>
       <span class="sct-total">Total</span>
       <span class="sct-qa">QA</span>
       <span class="sct-prod">PROD</span>
-      <span class="sct-comp">Comp.</span>
-      <span class="sct-bar">Avance</span>
+      <span class="sct-comp">OK</span>
+      <span class="sct-bar">Intranet</span>
     </div>`;
 
   d.categoryStats.forEach(c => {
