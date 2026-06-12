@@ -333,7 +333,7 @@ function renderProducts() {
       const sku = btn.dataset.sku;
       const p = state.products.find(x => String(x.sku) === sku);
       if (p && p.descripcion_intranet) {
-        const text = `${p.sku}\n${p.descripcion_intranet}`;
+        const text = p.descripcion_intranet;
         copyText(text, btn, sku);
       }
     });
@@ -823,7 +823,7 @@ function copyText(text, btn, sku) {
       setTimeout(() => { btn.textContent = '\uD83D\uDCCB Copiar'; btn.classList.remove('copied'); }, 2000);
     }
     if (sku) { addCopiado(sku); markRowAsCopied(sku); updateCopyProgress(); }
-    toast('SKU + descripción copiados al portapapeles', 'success', 2000);
+    toast('Descripción copiada', 'success', 2000);
   };
   if (navigator.clipboard && window.isSecureContext) {
     navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, btn, sku));
@@ -847,7 +847,7 @@ function fallbackCopy(text, btn, sku) {
       setTimeout(() => { btn.textContent = '\uD83D\uDCCB Copiar'; btn.classList.remove('copied'); }, 2000);
     }
     if (sku) { addCopiado(sku); markRowAsCopied(sku); updateCopyProgress(); }
-    toast('SKU + descripción copiados', 'success', 2000);
+    toast('Descripción copiada', 'success', 2000);
   } catch (e) {
     toast('Error al copiar', 'error');
   }
@@ -936,7 +936,7 @@ document.addEventListener('keydown', (e) => {
     const sku = row.dataset.sku;
     if (e.shiftKey) {
       const p = state.products.find(x => String(x.sku) === sku);
-      if (p && p.descripcion_intranet) copyText(`${p.sku}\n${p.descripcion_intranet}`, null, sku);
+      if (p && p.descripcion_intranet) copyText(p.descripcion_intranet, null, sku);
     } else {
       if (sku) copySku(sku, row.querySelector('.sku-clickable'));
     }
