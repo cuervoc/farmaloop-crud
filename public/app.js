@@ -254,12 +254,14 @@ function renderProducts() {
   }
 
   let html = '';
+  const copiados = getCopiados();
   state.products.forEach(p => {
     const stockClass = p.stock_total > 0 ? 'stock-ok' : 'stock-zero';
     const stockLabel = p.stock_total > 0 ? p.stock_total : '0';
+    const isCopied = copiados.has(String(p.sku));
 
-    html += `<tr data-id="${p.id}">
-      <td class="col-sku">${escHtml(p.sku)}</td>
+    html += `<tr data-id="${p.id}" data-sku="${escHtml(p.sku)}" class="${isCopied ? 'row-copied' : ''}">
+      <td class="col-sku"><span class="sku-clickable" data-sku="${escHtml(p.sku)}" title="Click para copiar SKU">${escHtml(p.sku)} ${isCopied ? '✅' : ''}</span></td>
       <td class="col-name">
         <a href="${escHtml(p.url)}" target="_blank" class="product-link" title="Abrir en farmaloop.cl">
           ${escHtml(truncate(p.fullName, 60))}
@@ -292,23 +294,36 @@ function renderProducts() {
         <button class="btn btn-sm btn-edit" data-id="${p.id}">✎ Editar</button>
       </td>
       <td class="col-copy">
-        <button class="btn btn-sm btn-copy-desc" data-sku="${escHtml(p.sku)}" title="Copiar descripción intranet">📋</button>
+        <button class="btn btn-sm btn-copy-all" data-sku="${escHtml(p.sku)}" title="Copiar SKU + descripción Intranet">📋 Copiar</button>
       </td>
     </tr>`;
   });
   productsBody.innerHTML = html;
+  updateCopyProgress();
 
   productsBody.querySelectorAll('.btn-edit').forEach(btn => {
     btn.addEventListener('click', () => openEdit(parseInt(btn.dataset.id)));
   });
 
-  productsBody.querySelectorAll('.btn-copy-desc').forEach(btn => {
+  // Botón Copiar: SKU + descripción completa
+  productsBody.querySelectorAll('.btn-copy-all').forEach(btn => {
     btn.addEventListener('click', () => {
       const sku = btn.dataset.sku;
       const p = state.products.find(x => String(x.sku) === sku);
       if (p && p.descripcion_intranet) {
-        copyText(p.descripcion_intranet, btn);
+        const text = `${p.sku}\n${p.descripcion_intranet}`;
+        copyText(text, btn, sku);
       }
+    });
+  });
+
+  // Click en SKU copia solo el SKU
+  productsBody.querySelectorAll('.sku-clickable').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const sku = el.dataset.sku;
+      copySku(sku, el);
     });
   });
 
@@ -778,24 +793,24 @@ function truncate(str, max) {
 }
 
 // Copiar texto al portapapeles (funciona en HTTP y HTTPS)
-function copyText(text, btn) {
+function copyText(text, btn, sku) {
   const done = () => {
     if (btn) {
       btn.textContent = '\u2705';
       btn.classList.add('copied');
-      setTimeout(() => { btn.textContent = '\uD83D\uDCCB'; btn.classList.remove('copied'); }, 2000);
+      setTimeout(() => { btn.textContent = '\uD83D\uDCCB Copiar'; btn.classList.remove('copied'); }, 2000);
     }
-    toast('Descripcion copiada al portapapeles', 'success', 2000);
+    if (sku) { addCopiado(sku); markRowAsCopied(sku); updateCopyProgress(); }
+    toast('SKU + descripción copiados al portapapeles', 'success', 2000);
   };
-  // Método moderno (HTTPS)
   if (navigator.clipboard && window.isSecureContext) {
-    navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, btn));
+    navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, btn, sku));
     return;
   }
-  fallbackCopy(text, btn);
+  fallbackCopy(text, btn, sku);
 }
 
-function fallbackCopy(text, btn) {
+function fallbackCopy(text, btn, sku) {
   const ta = document.createElement('textarea');
   ta.value = text;
   ta.style.position = 'fixed';
@@ -807,13 +822,48 @@ function fallbackCopy(text, btn) {
     if (btn) {
       btn.textContent = '\u2705';
       btn.classList.add('copied');
-      setTimeout(() => { btn.textContent = '\uD83D\uDCCB'; btn.classList.remove('copied'); }, 2000);
+      setTimeout(() => { btn.textContent = '\uD83D\uDCCB Copiar'; btn.classList.remove('copied'); }, 2000);
     }
-    toast('Descripcion copiada', 'success', 2000);
+    if (sku) { addCopiado(sku); markRowAsCopied(sku); updateCopyProgress(); }
+    toast('SKU + descripción copiados', 'success', 2000);
   } catch (e) {
     toast('Error al copiar', 'error');
   }
   document.body.removeChild(ta);
+}
+
+function copySku(sku, el) {
+  const done = () => {
+    addCopiado(sku);
+    markRowAsCopied(sku);
+    updateCopyProgress();
+    toast('SKU copiado: ' + sku, 'success', 1500);
+  };
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(sku).then(done).catch(() => fallbackCopySku(sku));
+    return;
+  }
+  fallbackCopySku(sku);
+}
+
+function fallbackCopySku(sku) {
+  const ta = document.createElement('textarea');
+  ta.value = sku;
+  ta.style.position = 'fixed'; ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); addCopiado(sku); markRowAsCopied(sku); updateCopyProgress(); toast('SKU copiado: ' + sku, 'success', 1500); }
+  catch (e) { toast('Error al copiar', 'error'); }
+  document.body.removeChild(ta);
+}
+
+function markRowAsCopied(sku) {
+  const row = productsBody.querySelector(`tr[data-sku="${sku}"]`);
+  if (row) {
+    row.classList.add('row-copied');
+    const skuEl = row.querySelector('.sku-clickable');
+    if (skuEl && !skuEl.textContent.includes('✅')) skuEl.textContent += ' ✅';
+  }
 }
 
 function debounce(fn, ms) {
@@ -844,6 +894,40 @@ function toggleTheme() {
 const saved = localStorage.getItem('theme') || 'light';
 applyTheme(saved);
 if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
+
+// ─── Keyboard nav ─────────────────────────────────────────────────────────────
+let kbIndex = -1;
+document.addEventListener('keydown', (e) => {
+  const rows = productsBody.querySelectorAll('tr');
+  if (rows.length === 0) return;
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    kbIndex = Math.min(kbIndex + 1, rows.length - 1);
+    highlightRow(rows, kbIndex);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    kbIndex = Math.max(kbIndex - 1, 0);
+    highlightRow(rows, kbIndex);
+  } else if (e.key === 'Enter' && kbIndex >= 0) {
+    e.preventDefault();
+    const row = rows[kbIndex];
+    const sku = row.dataset.sku;
+    if (e.shiftKey) {
+      const p = state.products.find(x => String(x.sku) === sku);
+      if (p && p.descripcion_intranet) copyText(`${p.sku}\n${p.descripcion_intranet}`, null, sku);
+    } else {
+      if (sku) copySku(sku, row.querySelector('.sku-clickable'));
+    }
+  }
+});
+
+function highlightRow(rows, idx) {
+  rows.forEach(r => r.classList.remove('kb-active'));
+  if (rows[idx]) {
+    rows[idx].classList.add('kb-active');
+    rows[idx].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+}
 
 async function init() {
   await loadStats();
