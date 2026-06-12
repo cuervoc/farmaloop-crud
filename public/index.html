@@ -194,6 +194,7 @@
           <div id="tableHeader">
             <span id="resultCount">Cargando productos...</span>
             <span id="copyProgress" class="copy-progress" title="Productos copiados hoy"></span>
+            <button id="btnResetCopiados" class="btn-reset-copiados" title="Limpiar checks">🗑️</button>
           </div>
           <div id="tableWrapper">
             <table id="productsTable">
@@ -201,6 +202,7 @@
                 <tr>
                   <th class="col-sku">SKU</th>
                   <th class="col-name">Producto</th>
+                  <th class="col-copy"></th>
                   <th class="col-category">Categoría</th>
                   <th class="col-stock">Stock</th>
                   <th class="col-principle">Principio Activo</th>
@@ -208,7 +210,6 @@
                   <th class="col-intranet">Intranet</th>
                   <th class="col-qa">QA</th>
                   <th class="col-actions">Acción</th>
-                  <th class="col-copy"></th>
                 </tr>
               </thead>
               <tbody id="productsBody">

@@ -264,6 +264,14 @@ function updateCopyProgress() {
   }
 }
 
+function resetCopiados() {
+  localStorage.removeItem('copiados');
+  productsBody.querySelectorAll('.row-copied').forEach(r => r.classList.remove('row-copied'));
+  productsBody.querySelectorAll('.sku-clickable').forEach(el => { el.textContent = el.dataset.sku; });
+  updateCopyProgress();
+  toast('Checks limpiados', 'info', 1500);
+}
+
 function renderProducts() {
   if (state.products.length === 0) {
     const isFiltered = state.currentCategory !== 'todas' || state.currentEstado !== 'todos' || state.search;
@@ -288,6 +296,9 @@ function renderProducts() {
         <a href="${escHtml(p.url)}" target="_blank" class="product-link" title="Abrir en farmaloop.cl">
           ${escHtml(truncate(p.fullName, 60))}
         </a>
+      </td>
+      <td class="col-copy">
+        <button class="btn btn-sm btn-copy-all" data-sku="${escHtml(p.sku)}" title="Copiar descripción Intranet">📋 Copiar</button>
       </td>
       <td class="col-category">${escHtml(p.subCategory || '-')}</td>
       <td class="col-stock"><span class="${stockClass}">${stockLabel}</span></td>
@@ -314,9 +325,6 @@ function renderProducts() {
       </td>
       <td class="col-actions">
         <button class="btn btn-sm btn-edit" data-id="${p.id}">✎ Editar</button>
-      </td>
-      <td class="col-copy">
-        <button class="btn btn-sm btn-copy-all" data-sku="${escHtml(p.sku)}" title="Copiar SKU + descripción Intranet">📋 Copiar</button>
       </td>
     </tr>`;
   });
@@ -800,6 +808,7 @@ document.addEventListener('keydown', (e) => {
 
 // Cerrar modal haciendo clic fuera
 document.querySelector('.modal-backdrop')?.addEventListener('click', closeConfigModal);
+document.getElementById('btnResetCopiados')?.addEventListener('click', resetCopiados);
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function escHtml(str) {
