@@ -494,6 +494,10 @@ function buildProgressBar(pct, length = 20) {
   return '\u2588'.repeat(filled) + '\u2591'.repeat(empty) + `  ${pct}%`;
 }
 
+function sanitizeSheetName(cat) {
+  return cat.replace(/[\[\]\*\?:/\\]/g, '-').substring(0, 31);
+}
+
 // ─── Columnas del detalle ────────────────────────────────────────────────────
 const DETAIL_COLUMNS = [
   { header: 'Principio Activo',  key: 'principio_activo',          width: 25 },
@@ -759,18 +763,18 @@ app.get('/api/export/excel', async (req, res) => {
     idxHeader.height = 22;
 
     summaryRows.filter(r => r.category !== 'TOTAL GENERAL').forEach((r) => {
-      const sheetName = r.category.length > 31 ? r.category.substring(0, 31) : r.category;
+      const sheetName = sanitizeSheetName(r.category);
       const row = indexSheet.addRow([null, r.category, r.total, `${r._pct}%`, 'Ver detalle →']);
       const cellName = row.getCell(2);
       cellName.font = { color: { argb: 'FF1A73E8' }, underline: true, size: 10 };
       cellName.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
-      cellName.hyperlink = { tooltip: `Ir a hoja "${sheetName}"`, target: `'${sheetName}'!A1` };
+      cellName.hyperlink = { tooltip: `Ir a "${r.category}"`, target: `#'${sheetName}'!A1` };
       row.getCell(3).alignment = { vertical: 'middle', horizontal: 'center' };
       row.getCell(4).alignment = { vertical: 'middle', horizontal: 'center' };
       const linkCell = row.getCell(5);
       linkCell.font = { color: { argb: 'FF1A73E8' }, bold: true, size: 10 };
       linkCell.alignment = { vertical: 'middle', horizontal: 'center' };
-      linkCell.hyperlink = { tooltip: `Ir a hoja "${sheetName}"`, target: `'${sheetName}'!A1` };
+      linkCell.hyperlink = { tooltip: `Ir a "${r.category}"`, target: `#'${sheetName}'!A1` };
       row.height = 20;
       // Zebra
       const isAlt = (row.number % 2 === 0);
@@ -784,7 +788,7 @@ app.get('/api/export/excel', async (req, res) => {
 
     // ── HOJAS DE DETALLE: una por categoría (Bloque 1) ──────────────────
     for (const [cat, prods] of bloque1Cats) {
-      const sheetName = cat.length > 31 ? cat.substring(0, 31) : cat;
+      const sheetName = sanitizeSheetName(cat);
       const sheet = workbook.addWorksheet(sheetName, { properties: { tabColor: { argb: 'FF8B5CF6' } } });
       sheet.columns = DETAIL_COLUMNS;
       sheet.views = [{ state: 'frozen', xSplit: 0, ySplit: 1 }];
