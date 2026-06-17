@@ -389,10 +389,9 @@ app.put('/api/config', async (req, res) => {
 
 // ─── Helpers de estilo ──────────────────────────────────────────────────────
 const ESTADO_COLORS = {
-  'prod completo':  { bg: 'FFC8E6C9', font: 'FF2E7D32' },  // verde
-  'prod incompleto':{ bg: 'FFFFCDD2', font: 'FFC62828' },  // rojo
-  'qa completo':    { bg: 'FFE3F2FD', font: 'FF1565C0' },  // azul
-  'qa incompleto':  { bg: 'FFFFE082', font: 'FFF57F17' },  // ámbar
+  'completado':     { bg: 'FFC8E6C9', font: 'FF2E7D32' },  // verde
+  'ingresado prod': { bg: 'FFFFE082', font: 'FFF57F17' },  // ámbar
+  'ingresado qa':   { bg: 'FFE3F2FD', font: 'FF1565C0' },  // azul
   pendiente:        { bg: 'FFF3F4F6', font: 'FF6B7280' },  // gris
 };
 
@@ -400,10 +399,9 @@ function applyRowStyle(row, estado) {
   const colors = ESTADO_COLORS[estado] || ESTADO_COLORS.pendiente;
   const estadoIcon = {
     'pendiente':     '\uD83D\uDE48',  // 🙈
-    'qa completo':   '\u2705',        // ✅
-    'qa incompleto': '\uD83D\uDD04',  // 🔄
-    'prod completo': '\uD83D\uDE80',  // 🚀
-    'prod incompleto':'\u26A0\uFE0F', // ⚠️
+    'ingresado qa':  '\uD83D\uDCCB',  // 📋
+    'ingresado prod':'\uD83D\uDD0D',  // 🔍
+    'completado':    '\u2705',        // ✅
   }[estado] || '\uD83D\uDE48';
   row.eachCell((cell) => {
     cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colors.bg } };
@@ -417,8 +415,8 @@ function applyRowStyle(row, estado) {
     cell.alignment = { ...cell.alignment, vertical: 'top', wrapText: true };
   });
   // Marcar estado con icono
-  const estadoCell = row.getCell('estado');
-  if (estadoCell) estadoCell.value = `${estadoIcon} ${estado}`;
+  const intranetCell = row.getCell('estado_intranet');
+  if (intranetCell) intranetCell.value = `${estadoIcon} ${estado}`;
   row.height = Math.max(row.height || 18, 28);
 }
 
@@ -501,6 +499,7 @@ const DETAIL_COLUMNS = [
   { header: 'Principio Activo',  key: 'principio_activo',          width: 25 },
   { header: 'SKU',               key: 'sku',                       width: 12 },
   { header: 'Producto',          key: 'fullName',                  width: 45 },
+  { header: 'Intranet',          key: 'estado_intranet',           width: 14 },
   { header: 'Estado SEO',        key: 'estado',                    width: 14 },
   { header: 'Title SEO',         key: 'title_optimizado',          width: 50 },
   { header: 'Meta Description',  key: 'meta_description_optimizado', width: 60 },
@@ -542,12 +541,13 @@ app.get('/api/export/excel', async (req, res) => {
     const bloque1Cats = Object.entries(grouped).filter(([cat]) => CATEGORIAS_BLOQUE1.includes(cat));
     const bloque1Prods = bloque1Cats.flatMap(([, prods]) => prods);
     const totalProd   = bloque1Prods.length;
-    const enQA        = bloque1Prods.filter(p => ['qa completo','prod completo','prod incompleto'].includes(p.estado)).length;
-    const enPROD      = bloque1Prods.filter(p => ['prod completo','prod incompleto'].includes(p.estado)).length;
-    const completado  = bloque1Prods.filter(p => p.estado === 'prod completo').length;
+    const enQA        = bloque1Prods.filter(p => ['ingresado qa','ingresado prod','completado'].includes(p.estado_intranet || '')).length;
+    const enPROD      = bloque1Prods.filter(p => ['ingresado prod','completado'].includes(p.estado_intranet || '')).length;
+    const completado  = bloque1Prods.filter(p => (p.estado_intranet || '') === 'completado').length;
     const totalPend   = totalProd - enQA;
     const globalPct   = totalProd > 0 ? Math.round((completado / totalProd) * 100) : 0;
     const globalPctQA = totalProd > 0 ? Math.round((enQA / totalProd) * 100) : 0;
+    const globalPctPROD = totalProd > 0 ? Math.round((enPROD / totalProd) * 100) : 0;
     const allDates    = bloque1Prods.filter(p => p.fecha_optimizacion).map(p => new Date(p.fecha_optimizacion));
     const lastDate    = allDates.length > 0 ? allDates.reduce((a, b) => a > b ? a : b) : null;
     const allPA       = new Set(bloque1Prods.map(p => p.principio_activo).filter(Boolean));
@@ -596,11 +596,11 @@ app.get('/api/export/excel', async (req, res) => {
       };
     };
     kpiStyle(cover.getCell('B6'), 'TOTAL PRODUCTOS', String(totalProd), 'FF0F172A');
-    kpiStyle(cover.getCell('C6'), 'COMPLETADOS',    `${completado}  ·  ${globalPct}%`, 'FF16A34A');
+    kpiStyle(cover.getCell('C6'), 'EN PRODUCCION',    `${enPROD}  ·  ${globalPctPROD}%`, 'FF16A34A');
 
     const kpiRow2 = cover.addRow([null, null, null, null]);
     kpiRow2.height = 70;
-    kpiStyle(cover.getCell('B7'), 'EN QA',         `${enQA}  ·  ${globalPctQA}%`,     'FF2563EB');
+    kpiStyle(cover.getCell('B7'), 'EN QA INTRANET',   `${enQA}  ·  ${globalPctQA}%`,     'FF2563EB');
     kpiStyle(cover.getCell('C7'), 'PENDIENTES',    String(totalPend),   'FFDC2626');
 
     cover.addRow();
@@ -650,9 +650,9 @@ app.get('/api/export/excel', async (req, res) => {
     summary.columns = [
       { header: 'Categoría',           key: 'category',     width: 32 },
       { header: 'Total',               key: 'total',        width: 10 },
-      { header: 'QA',                  key: 'en_qa',        width: 8 },
-      { header: 'PROD',                key: 'en_prod',      width: 8 },
-      { header: 'Completado',          key: 'completado',   width: 12 },
+      { header: 'QA Intranet',         key: 'en_qa',        width: 12 },
+      { header: 'PROD Intranet',       key: 'en_prod',      width: 12 },
+      { header: 'OK Intranet',         key: 'completado',   width: 12 },
       { header: 'Pendientes',          key: 'pendientes',   width: 14 },
       { header: 'Avance',              key: 'avance',       width: 32 },
       { header: 'Última optimización', key: 'last_opt',     width: 22 },
@@ -660,10 +660,9 @@ app.get('/api/export/excel', async (req, res) => {
 
     const summaryRows = bloque1Cats
       .map(([cat, prods]) => {
-        const enQaCount = prods.filter(p => ['qa completo','prod completo','prod incompleto'].includes(p.estado)).length;
-        const enProdCount = prods.filter(p => ['prod completo','prod incompleto'].includes(p.estado)).length;
-        const compCount = prods.filter(p => p.estado === 'prod completo').length;
-        const paSet = new Set(prods.map(p => p.principio_activo).filter(Boolean));
+        const enQaCount = prods.filter(p => ['ingresado qa','ingresado prod','completado'].includes(p.estado_intranet || '')).length;
+        const enProdCount = prods.filter(p => ['ingresado prod','completado'].includes(p.estado_intranet || '')).length;
+        const compCount = prods.filter(p => (p.estado_intranet || '') === 'completado').length;
         const dates = prods
           .filter(p => p.fecha_optimizacion)
           .map(p => new Date(p.fecha_optimizacion));
@@ -821,6 +820,7 @@ app.get('/api/export/excel', async (req, res) => {
         const items = paGroups[pa].sort((a, b) => (a.fullName || '').localeCompare(b.fullName || ''));
         addGroupHeader(sheet, pa, items.length);
         for (const p of items) {
+          const intranet = p.estado_intranet || 'pendiente';
           const estado = p.estado || 'pendiente';
           const fecha = p.fecha_optimizacion
             ? new Date(p.fecha_optimizacion).toISOString().split('T')[0]
@@ -829,6 +829,7 @@ app.get('/api/export/excel', async (req, res) => {
             principio_activo: pa,
             sku: p.sku,
             fullName: p.fullName,
+            estado_intranet: intranet,
             estado: estado,
             title_optimizado: p.title_optimizado || '',
             meta_description_optimizado: p.meta_description_optimizado || '',
@@ -842,7 +843,7 @@ app.get('/api/export/excel', async (req, res) => {
             fecha_optimizacion: fecha,
             descripcion_intranet: buildIntranetDescription(p),
           });
-          applyRowStyle(row, estado);
+          applyRowStyle(row, intranet);
 
           // Hyperlink de SKU a la tienda
           const skuCell = row.getCell('sku');
