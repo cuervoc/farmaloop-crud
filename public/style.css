@@ -1175,6 +1175,7 @@ body {
 .col-category { width: 160px; }
 .col-stock { width: 60px; text-align: center; }
 .col-principle { width: 160px; }
+.col-flag { width: 36px; text-align: center; font-size: 1rem; }
 .col-status { width: 155px; }
 .col-intranet { width: 130px; text-align: center; }
 .col-qa { width: 40px; text-align: center; }

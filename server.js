@@ -117,6 +117,18 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
+// GET /api/products/flags - Obtener todos los flags activos (ANTES de /:id)
+app.get('/api/products/flags', async (req, res) => {
+  try {
+    const rows = await query('SELECT product_id, sku, nota FROM product_flags WHERE resolved = 0 ORDER BY created_at DESC');
+    const flags = {};
+    rows.forEach(r => { flags[r.product_id] = { sku: r.sku, nota: r.nota }; });
+    res.json(flags);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // GET /api/products/:id
 app.get('/api/products/:id', async (req, res) => {
   try {
@@ -198,6 +210,32 @@ app.patch('/api/products/:id/intranet', async (req, res) => {
       'UPDATE products SET estado_intranet = ? WHERE id = ?',
       [estado_intranet, parseInt(req.params.id)]
     );
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ─── Flags de error ────────────────────────────────────────────────────────
+// POST /api/products/:id/flag - Marcar producto con error
+app.post('/api/products/:id/flag', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { nota } = req.body;
+    const [row] = await query('SELECT sku FROM products WHERE id = ?', [id]);
+    if (!row) return res.status(404).json({ error: 'Producto no encontrado' });
+    await query('INSERT INTO product_flags (product_id, sku, nota) VALUES (?, ?, ?)', [id, row.sku, nota || '']);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// DELETE /api/products/:id/flag - Desmarcar error
+app.delete('/api/products/:id/flag', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    await query('UPDATE product_flags SET resolved = 1 WHERE product_id = ? AND resolved = 0', [id]);
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });

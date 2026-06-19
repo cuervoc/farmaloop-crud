@@ -14,6 +14,7 @@ const state = {
   sprintData: null,
   pendingEditId: null,
   loading: false,
+  flags: {},
 };
 
 // ─── DOM refs ────────────────────────────────────────────────────────────────
@@ -119,6 +120,20 @@ const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  },
+  async post(endpoint, data) {
+    const res = await fetch(`/api${endpoint}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data || {}),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  },
+  async del(endpoint) {
+    const res = await fetch(`/api${endpoint}`, { method: 'DELETE' });
     if (!res.ok) throw new Error(await res.text());
     return res.json();
   },
@@ -304,15 +319,7 @@ function renderProducts() {
       <td class="col-category">${escHtml(p.subCategory || '-')}</td>
       <td class="col-stock"><span class="${stockClass}">${stockLabel}</span></td>
       <td class="col-principle">${escHtml(p.principio_activo || '-')}</td>
-      <td class="col-status">
-        <select class="estado-select" data-id="${p.id}" data-sku="${escHtml(p.sku)}">
-          <option value="pendiente" ${(p.estado || 'pendiente') === 'pendiente' ? 'selected' : ''}>🙈 pendiente</option>
-          <option value="qa completo" ${(p.estado || 'pendiente') === 'qa completo' ? 'selected' : ''}>✅ qa completo</option>
-          <option value="qa incompleto" ${(p.estado || 'pendiente') === 'qa incompleto' ? 'selected' : ''}>🔄 qa incompleto</option>
-          <option value="prod completo" ${(p.estado || 'pendiente') === 'prod completo' ? 'selected' : ''}>🚀 prod completo</option>
-          <option value="prod incompleto" ${(p.estado || 'pendiente') === 'prod incompleto' ? 'selected' : ''}>⚠️ prod incompleto</option>
-        </select>
-      </td>
+      <td class="col-flag">${state.flags && state.flags[p.id] ? '🚩' : ''}</td>
       <td class="col-intranet">
         <select class="intranet-select" data-id="${p.id}" data-sku="${escHtml(p.sku)}">
           <option value="pendiente" ${(p.estado_intranet || 'pendiente') === 'pendiente' ? 'selected' : ''}>🙈 pendiente</option>
@@ -367,19 +374,6 @@ function renderProducts() {
         sel.classList.add('saved');
         setTimeout(() => sel.classList.remove('saved'), 1500);
         toast(`Intranet actualizado a "${estado}"`, 'success', 2000);
-      } catch (e) { toast('Error: ' + e.message, 'error'); }
-    });
-  });
-
-  productsBody.querySelectorAll('.estado-select').forEach(sel => {
-    sel.addEventListener('change', async () => {
-      const id = parseInt(sel.dataset.id);
-      const estado = sel.value;
-      try {
-        await api.patch(`/products/${id}/estado`, { estado });
-        sel.classList.add('saved');
-        setTimeout(() => sel.classList.remove('saved'), 1500);
-        toast(`Estado actualizado a "${estado}"`, 'success', 2000);
       } catch (e) { toast('Error: ' + e.message, 'error'); }
     });
   });
@@ -666,12 +660,12 @@ function openEdit(id) {
   editNotas.value = product.notas || '';
   editIntranetDesc.value = product.descripcion_intranet || '';
 
-  const hasError = product.estado === 'qa incompleto';
+  const hasFlag = state.flags && state.flags[product.id];
   const flagBtn = document.getElementById('btnFlagError');
   if (flagBtn) {
-    flagBtn.textContent = hasError ? '✅' : '🚩';
-    flagBtn.title = hasError ? 'Desmarcar error' : 'Marcar con error';
-    flagBtn.dataset.hasError = hasError ? '1' : '0';
+    flagBtn.textContent = hasFlag ? '✅' : '🚩';
+    flagBtn.title = hasFlag ? 'Desmarcar error' : 'Marcar con error';
+    flagBtn.dataset.flagged = hasFlag ? '1' : '0';
   }
 
   updateCharCounts();
@@ -683,17 +677,23 @@ function openEdit(id) {
 async function toggleError() {
   const id = parseInt(editId.value);
   if (!id) return;
-  const current = document.getElementById('btnFlagError')?.dataset.hasError === '1';
-  const nuevoEstado = current ? 'qa completo' : 'qa incompleto';
+  const current = document.getElementById('btnFlagError')?.dataset.flagged === '1';
   try {
-    await api.patch(`/products/${id}/estado`, { estado: nuevoEstado });
+    if (current) {
+      await api.del(`/products/${id}/flag`);
+      state.flags[id] = null;
+    } else {
+      await api.post(`/products/${id}/flag`, { nota: '' });
+      state.flags[id] = { sku: '', nota: '' };
+    }
     const flagBtn = document.getElementById('btnFlagError');
     if (flagBtn) {
       flagBtn.textContent = current ? '🚩' : '✅';
       flagBtn.title = current ? 'Marcar con error' : 'Desmarcar error';
-      flagBtn.dataset.hasError = current ? '0' : '1';
+      flagBtn.dataset.flagged = current ? '0' : '1';
     }
-    toast(current ? 'Error desmarcado' : '🚩 Producto marcado con error', current ? 'info' : 'warning', 2000);
+    loadFlags();
+    toast(current ? 'Flag removido' : '🚩 Producto marcado', current ? 'info' : 'warning', 2000);
   } catch (e) { toast('Error: ' + e.message, 'error'); }
 }
 
@@ -994,10 +994,16 @@ function highlightRow(rows, idx) {
   }
 }
 
+async function loadFlags() {
+  try { state.flags = await api.get('/products/flags'); }
+  catch { state.flags = {}; }
+}
+
 async function init() {
   await loadStats();
   await loadCategories();
   await loadProducts();
+  await loadFlags();
 }
 
 init();
