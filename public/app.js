@@ -48,6 +48,7 @@ const editProductName = $('#editProductName');
 const btnSaveEdit = $('#btnSaveEdit');
 const btnCancelEdit = $('#btnCancelEdit');
 const btnCloseEdit = $('#btnCloseEdit');
+const btnFlagError = $('#btnFlagError');
 const titleCount = $('#titleCount');
 const metaCount = $('#metaCount');
 
@@ -665,10 +666,35 @@ function openEdit(id) {
   editNotas.value = product.notas || '';
   editIntranetDesc.value = product.descripcion_intranet || '';
 
+  const hasError = product.estado === 'qa incompleto';
+  const flagBtn = document.getElementById('btnFlagError');
+  if (flagBtn) {
+    flagBtn.textContent = hasError ? '✅' : '🚩';
+    flagBtn.title = hasError ? 'Desmarcar error' : 'Marcar con error';
+    flagBtn.dataset.hasError = hasError ? '1' : '0';
+  }
+
   updateCharCounts();
   const overlay = document.getElementById('editOverlay');
   overlay.classList.remove('hidden');
   document.body.classList.add('no-scroll');
+}
+
+async function toggleError() {
+  const id = parseInt(editId.value);
+  if (!id) return;
+  const current = document.getElementById('btnFlagError')?.dataset.hasError === '1';
+  const nuevoEstado = current ? 'qa completo' : 'qa incompleto';
+  try {
+    await api.patch(`/products/${id}/estado`, { estado: nuevoEstado });
+    const flagBtn = document.getElementById('btnFlagError');
+    if (flagBtn) {
+      flagBtn.textContent = current ? '🚩' : '✅';
+      flagBtn.title = current ? 'Marcar con error' : 'Desmarcar error';
+      flagBtn.dataset.hasError = current ? '0' : '1';
+    }
+    toast(current ? 'Error desmarcado' : '🚩 Producto marcado con error', current ? 'info' : 'warning', 2000);
+  } catch (e) { toast('Error: ' + e.message, 'error'); }
 }
 
 function closeEdit() {
@@ -756,6 +782,7 @@ editMetaDesc.addEventListener('input', updateCharCounts);
 btnSaveEdit.addEventListener('click', saveEdit);
 btnCancelEdit.addEventListener('click', closeEdit);
 btnCloseEdit.addEventListener('click', closeEdit);
+btnFlagError?.addEventListener('click', toggleError);
 document.getElementById('editOverlay')?.addEventListener('click', closeEditIfBackdrop);
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && state.editing) closeEdit(); });
 
