@@ -727,15 +727,12 @@ async function saveEdit() {
 
   try {
     await api.put(`/products/${id}`, data);
+    // Actualizar producto en memoria sin recargar tabla
+    const product = state.products.find(p => p.id === id);
+    if (product) Object.assign(product, data);
     closeEdit();
+    renderProducts();
     toast('Producto guardado correctamente', 'success');
-    loadStats();
-    loadProducts();
-    // Recargar sprint si está visible
-    if (state.currentTab !== 'catalogo') {
-      state.sprintData = null;
-      loadSprint();
-    }
   } catch (err) {
     toast('Error al guardar: ' + err.message, 'error');
   }
