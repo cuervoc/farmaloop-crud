@@ -39,21 +39,23 @@ function extractForma(name) {
 }
 
 function extractCantidad(name) {
-  const patterns = [
-    /x\s*(\d+)\s*(Comprimidos?|C[áa]psulas?|Ampollas?|Sobres?|Tabletas|Grageas|Parches?|Supositorios?|[ÓO]vulos)/i,
-    /x\s*(\d+)\s*(ml|g|gr|MG|mg|mL|gramos)\b/i,
-    /x\s*(\d+)\s*(Dispositivo|Unidades|Jeringa)/i,
-    /Frasco\s*x\s*(\d+)\s*ml/i,
-    /(\d+)\s*ml\s*x\s*\d+/i,
-  ];
-  for (const re of patterns) {
-    const m = name.match(re);
-    if (m) {
-      const num = m[1];
-      const unit = m[2] ? m[2].toLowerCase() : 'unidades';
-      return `x ${num} ${unit}`;
-    }
+  // "x 30 Comprimidos"
+  let m = name.match(/x\s*(\d+)\s*(Comprimidos?|C[áa]psulas?|Ampollas?|Sobres?|Tabletas|Grageas|Parches?|Supositorios?|[ÓO]vulos|ml|g|gr|mL|gramos)\b/i);
+  if (m) {
+    const unit = m[2] ? m[2].toLowerCase() : 'unidades';
+    return `x ${m[1]} ${unit}`;
   }
+  // "30 Comprimidos" (sin x)
+  m = name.match(/(\d+)\s*(Comprimidos?|C[áa]psulas?|Tabletas|Parches?)\s*(Recubiertos?|Dispersables|Prolongados?)?\s*$/i);
+  if (m && parseInt(m[1]) <= 200) {
+    return `x ${m[1]} ${m[2].toLowerCase()}`;
+  }
+  // Solo número de ml
+  m = name.match(/(\d+)\s*ml\b/i);
+  if (m) return `x ${m[1]} ml`;
+  // "1 Dispositivo"
+  m = name.match(/(\d+)\s*(Dispositivo|Jeringa|Frasco)\s*(Prellenado)?/i);
+  if (m) return `x ${m[1]} ${m[2].toLowerCase()}`;
   return null;
 }
 
