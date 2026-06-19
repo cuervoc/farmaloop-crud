@@ -666,15 +666,20 @@ function openEdit(id) {
   editIntranetDesc.value = product.descripcion_intranet || '';
 
   updateCharCounts();
-  editPanel.classList.remove('hidden');
-  editPanel.classList.add('visible');
-  editPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  const overlay = document.getElementById('editOverlay');
+  overlay.classList.remove('hidden');
+  document.body.classList.add('no-scroll');
 }
 
 function closeEdit() {
   state.editing = null;
-  editPanel.classList.remove('visible');
-  editPanel.classList.add('hidden');
+  const overlay = document.getElementById('editOverlay');
+  overlay.classList.add('hidden');
+  document.body.classList.remove('no-scroll');
+}
+
+function closeEditIfBackdrop(e) {
+  if (e.target === e.currentTarget) closeEdit();
 }
 
 async function saveEdit() {
@@ -751,6 +756,8 @@ editMetaDesc.addEventListener('input', updateCharCounts);
 btnSaveEdit.addEventListener('click', saveEdit);
 btnCancelEdit.addEventListener('click', closeEdit);
 btnCloseEdit.addEventListener('click', closeEdit);
+document.getElementById('editOverlay')?.addEventListener('click', closeEditIfBackdrop);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && state.editing) closeEdit(); });
 
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && state.editing) closeEdit();
