@@ -463,14 +463,20 @@ function applyRowStyle(row, estado) {
 function fixTextOrtografia(text) {
   if (!text) return text;
   let t = text;
-  // Cargar diccionario (sincrónico porque es chico y solo al iniciar)
   const DICT = require('./scripts/dict-ortografia.json');
   for (const [from, to] of DICT) {
-    // Usar word boundary o literal según el patrón
     if (from.startsWith(' ') || from.endsWith(' ')) {
       t = t.split(from).join(to);
+    } else if (/^[a-záéíóúñ]/i.test(from)) {
+      t = t.replace(new RegExp('\\b' + from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi'), (m) => m === from ? to : m);
     } else {
       t = t.replace(new RegExp(from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), to);
+    }
+    // Capitalized version
+    const capFrom = from.charAt(0).toUpperCase() + from.slice(1);
+    const capTo = to.charAt(0).toUpperCase() + to.slice(1);
+    if (capFrom !== from) {
+      t = t.replace(new RegExp('\\b' + capFrom.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'g'), capTo);
     }
   }
   t = t.replace(/- Principio activo: ([a-záéíóúñ])/g, (m, c) => `- Principio activo: ${c.toUpperCase()}`);

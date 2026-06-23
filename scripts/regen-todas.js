@@ -11,8 +11,15 @@ function fixText(text) {
   for (const [from, to] of DICT) {
     if (from.startsWith(' ') || from.endsWith(' ')) {
       t = t.split(from).join(to);
+    } else if (/^[a-záéíóúñ]/i.test(from)) {
+      t = t.replace(new RegExp('\\b' + from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi'), (m) => m.toLowerCase() === from ? to : to.charAt(0).toUpperCase() + to.slice(1));
     } else {
       t = t.replace(new RegExp(from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), to);
+    }
+    const capFrom = from.charAt(0).toUpperCase() + from.slice(1);
+    const capTo = to.charAt(0).toUpperCase() + to.slice(1);
+    if (capFrom !== from && /^[a-záéíóúñ]/i.test(from)) {
+      t = t.replace(new RegExp('\\b' + capFrom.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'g'), capTo);
     }
   }
   t = t.replace(/- Principio activo: ([a-záéíóúñ])/g, (m, c) => `- Principio activo: ${c.toUpperCase()}`);

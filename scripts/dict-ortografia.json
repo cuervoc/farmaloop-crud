@@ -19,10 +19,9 @@
   ["atipico","atípico"],["tipico","típico"],
   ["topico","tópico"],["osea","ósea"],["oseo","óseo"],
   ["practico","práctico"],["tetrico","tétrico"],
-  ["liquido","líquido"],["solido","sólido"],
-  ["rapido","rápido"],
+  ["liquido","líquido"],["solido","sólido"],["rapido","rápido"],
 
-  ["al dia","al día"],["cada dia","cada día"],
+  [" al dia"," al día"],[" cada dia"," cada día"],
 
   ["sueno","sueño"],["suenos","sueños"],["migrana","migraña"],
   ["compania","compañía"],["acompanar","acompañar"],["montana","montaña"],
