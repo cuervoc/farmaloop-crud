@@ -30,7 +30,8 @@
   ["proposito","propósito"],["estimulo","estímulo"],
   ["panico","pánico"],["vertigo","vértigo"],["sindrome","síndrome"],
   ["Meniere","Ménière"],["trigemino","trigémino"],["tension","tensión"],
-  ["digestion","digestión"],
+  ["hipertension","hipertensión"],["diuretico","diurético"],
+  ["progestageno","progestágeno"],["isotretinoina","Isotretinoína"],
 
   ["Forma Farmaceutica","forma farmacéutica"],
   ["Forma Farmacéutica","forma farmacéutica"],
@@ -41,10 +42,10 @@
 
   ["capsulas","cápsulas"],
   [" Gotas "," gotas "],[" Ampollas "," ampollas "],
-  ["recubier..","recubiertos"],["recubier.","recubiertos"],
+  ["recubiertostos","recubiertos"],["recubier..","recubiertos"],["recubier.","recubiertos"],
 
   ["DepakeneJarabeAcido","Depakene Jarabe Ácido"],
   ["Soluci+Â¦n","Solución"],
-  ["+¡a","ía"],["+¡","í"],["+í","á"],["+ü","Á"],
+  ["+¡a","ía"],["+¡","í"],
   ["Ã©","é"],["Ã¡","á"],["Ã³","ó"],["Ã±","ñ"],["Ãº","ú"]
 ]
