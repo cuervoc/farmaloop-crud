@@ -1,4 +1,5 @@
 const mysql = require('mysql2/promise');
+const DICT = require('./dict-ortografia.json');
 
 const DB_CONFIG = {
   host: 'db',
@@ -7,6 +8,24 @@ const DB_CONFIG = {
   password: 'seo_pass_2026',
   database: 'farmaloop_seo',
 };
+
+function fixText(text) {
+  if (!text) return text;
+  let t = text;
+  for (const [from, to] of DICT) {
+    if (/[^a-záéíóúñü]/i.test(from)) {
+      t = t.split(from).join(to);
+    } else {
+      t = t.replace(new RegExp('\\b' + from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi'), (m) => m.toLowerCase() === from.toLowerCase() ? to : to.charAt(0).toUpperCase() + to.slice(1));
+    }
+    const capFrom = from.charAt(0).toUpperCase() + from.slice(1);
+    if (capFrom !== from && !/[^a-záéíóúñü]/i.test(from)) {
+      const capTo = to.charAt(0).toUpperCase() + to.slice(1);
+      t = t.replace(new RegExp('\\b' + capFrom.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'g'), capTo);
+    }
+  }
+  return t.replace(/  +/g, ' ');
+}
 
 function buildIntranetDescription(p) {
   const lab = p.laboratorio || '';
@@ -50,7 +69,7 @@ function buildIntranetDescription(p) {
   descripcion.push(`Indicaciones de embarazo y lactancia:`);
   descripcion.push(`Uso solo bajo indicación médica. Si estás embarazada, planeas estarlo o en período de lactancia, consulta a tu médico antes de usar.`);
 
-  return descripcion.join('\n');
+  return fixText(descripcion.join('\n'));
 }
 
 async function main() {

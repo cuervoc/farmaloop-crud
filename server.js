@@ -465,18 +465,24 @@ function fixTextOrtografia(text) {
   let t = text;
   const DICT = require('./scripts/dict-ortografia.json');
   for (const [from, to] of DICT) {
-    if (from.startsWith(' ') || from.endsWith(' ')) {
+    // Non-letter chars or spaces → split/join (literal)
+    if (/[^a-záéíóúñü]/i.test(from)) {
       t = t.split(from).join(to);
-    } else if (/^[a-záéíóúñ]/i.test(from)) {
-      t = t.replace(new RegExp('\\b' + from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi'), (m) => m === from ? to : m);
+      // Capitalized variant
+      if (from.charAt(0) !== from.charAt(0).toUpperCase()) {
+        const capFrom = from.charAt(0).toUpperCase() + from.slice(1);
+        const capTo = to.charAt(0).toUpperCase() + to.slice(1);
+        t = t.split(capFrom).join(capTo);
+      }
     } else {
-      t = t.replace(new RegExp(from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), to);
-    }
-    // Capitalized version
-    const capFrom = from.charAt(0).toUpperCase() + from.slice(1);
-    const capTo = to.charAt(0).toUpperCase() + to.slice(1);
-    if (capFrom !== from) {
-      t = t.replace(new RegExp('\\b' + capFrom.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'g'), capTo);
+      // Word boundary for alpha-only words
+      t = t.replace(new RegExp('\\b' + from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi'), (m) => m.toLowerCase() === from.toLowerCase() ? to : to.charAt(0).toUpperCase() + to.slice(1));
+      // Capitalized
+      const capFrom = from.charAt(0).toUpperCase() + from.slice(1);
+      if (capFrom !== from) {
+        const capTo = to.charAt(0).toUpperCase() + to.slice(1);
+        t = t.replace(new RegExp('\\b' + capFrom.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'g'), capTo);
+      }
     }
   }
   t = t.replace(/- Principio activo: ([a-záéíóúñ])/g, (m, c) => `- Principio activo: ${c.toUpperCase()}`);
