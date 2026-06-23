@@ -487,6 +487,10 @@ function fixTextOrtografia(text) {
   }
   t = t.replace(/- Principio activo: ([a-záéíóúñ])/g, (m, c) => `- Principio activo: ${c.toUpperCase()}`);
   t = t.replace(/  +/g, ' ');
+  // Capitalizar después de Label: en bullets
+  t = t.replace(/(- [^:\n]+: )([a-záéíóúñ])/gm, (m, prefix, letter) => prefix + letter.toUpperCase());
+  // "Cantidad: X" → "Cantidad: x"
+  t = t.replace(/- Cantidad:\s+X\b/g, '- Cantidad: x');
   return t;
 }
 

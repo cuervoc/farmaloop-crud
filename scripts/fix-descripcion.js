@@ -24,7 +24,9 @@ function fixText(text) {
       t = t.replace(new RegExp('\\b' + capFrom.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'g'), capTo);
     }
   }
-  return t.replace(/  +/g, ' ');
+  t = t.replace(/  +/g, ' ');
+  t = t.replace(/(- [^:\n]+: )([a-záéíóúñ])/gm, (m, prefix, letter) => prefix + letter.toUpperCase());
+  return t;
 }
 
 function buildIntranetDescription(p) {

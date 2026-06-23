@@ -24,6 +24,7 @@ function fixText(text) {
   }
   t = t.replace(/- Principio activo: ([a-záéíóúñ])/g, (m, c) => `- Principio activo: ${c.toUpperCase()}`);
   t = t.replace(/  +/g, ' ');
+  t = t.replace(/(- [^:\n]+: )([a-záéíóúñ])/gm, (m, prefix, letter) => prefix + letter.toUpperCase());
   return t;
 }
 
