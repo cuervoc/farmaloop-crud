@@ -1,43 +1,20 @@
 const mysql = require('mysql2/promise');
 const pool = mysql.createPool({host:'db',port:3306,user:'seo_user',password:'seo_pass_2026',database:'farmaloop_seo'});
+const DICT = require('./dict-ortografia.json');
 
 const CATS = ['Control de Peso','Diabetes','Colesterol','Salud Mental','Anticonceptivos y Hormonas','Fertilidad','Hipertensión','Sistema Digestivo','Huesos y Articulaciones','Bienestar Sexual','Sistema Inmune','Omega 3','Probióticos'];
 const PH = CATS.map(() => '?').join(',');
 
-const DICT = [
-  ['depresion','depresión'],['obsesion','obsesión'],['compulsion','compulsión'],
-  ['prevencion','prevención'],['indicacion','indicación'],['medicacion','medicación'],
-  ['aplicacion','aplicación'],['inyeccion','inyección'],['solucion','solución'],
-  ['informacion','información'],['presentacion','presentación'],['composicion','composición'],
-  ['administracion','administración'],['duracion','duración'],
-  ['funcion','función'],['sedacion','sedación'],
-  ['regulacion','regulación'],['suplementacion','suplementación'],['combinacion','combinación'],
-  ['relacion sexual','relación sexual'],['proteccion','protección'],
-  ['sintoma ','síntoma '],['sintomas','síntomas'],['maximo','máximo'],['minimo','mínimo'],['unico','único'],
-  ['especifico','específico'],['genetico','genético'],['organico','orgánico'],
-  ['clinico','clínico'],['cronico','crónico'],['psicotico','psicótico'],['epileptico','epiléptico'],
-  ['neuropatico','neuropático'],['farmaceutica','farmacéutica'],['periodo','período'],
-  ['ansiolitica','ansiolítica'],['topico','tópico'],['osea ','ósea '],
-  [' al dia',' al día'],['sueno','sueño'],['migrana','migraña'],
-  ['compania','compañía'],['acompanar','acompañar'],
-  ['acido ','ácido '],['Acido ','Ácido '],['acne','acné'],['despues','después'],
-  ['panico','pánico'],['vertigo','vértigo'],['sindrome','síndrome'],['Meniere','Ménière'],
-  ['trigemino','trigémino'],['tension ','tensión '],['digestion','digestión'],
-  ['Forma Farmaceutica:','Forma farmacéutica:'],
-  ['Forma Farmacéutica:','Forma farmacéutica:'],
-  ['Comprimidos Recubiertos','comprimidos recubiertos'],
-  ['Comprimidos Recubierto','comprimidos recubiertos'],
-  ['capsulas','cápsulas'],['Capsulas','cápsulas'],
-  [' Gotas ',' gotas '],[' Ampollas ',' ampollas '],
-  ['recubier..','recubiertos'],['recubier.','recubiertos'],
-  ['DepakeneJarabeAcido','Depakene Jarabe Ácido'],
-  ['Soluci+Â¦n','Solución'],
-];
-
 function fixText(text) {
   if (!text) return text;
   let t = text;
-  for (const [from, to] of DICT) t = t.replace(new RegExp(from, 'g'), to);
+  for (const [from, to] of DICT) {
+    if (from.startsWith(' ') || from.endsWith(' ')) {
+      t = t.split(from).join(to);
+    } else {
+      t = t.replace(new RegExp(from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), to);
+    }
+  }
   t = t.replace(/- Principio activo: ([a-záéíóúñ])/g, (m, c) => `- Principio activo: ${c.toUpperCase()}`);
   t = t.replace(/  +/g, ' ');
   return t;

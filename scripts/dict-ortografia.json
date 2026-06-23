@@ -1,0 +1,51 @@
+[
+  ["depresion","depresión"],["obsesion","obsesión"],["compulsion","compulsión"],
+  ["prevencion","prevención"],["indicacion","indicación"],["medicacion","medicación"],
+  ["aplicacion","aplicación"],["inyeccion","inyección"],["solucion","solución"],
+  ["informacion","información"],["presentacion","presentación"],["composicion","composición"],
+  ["administracion","administración"],["concentracion","concentración"],
+  ["duracion","duración"],["funcion","función"],["sedacion","sedación"],
+  ["absorcion","absorción"],["regulacion","regulación"],["suplementacion","suplementación"],
+  ["combinacion","combinación"],["proteccion","protección"],["contraccion","contracción"],
+  ["relacion sexual","relación sexual"],
+
+  ["sintoma","síntoma"],["sintomas","síntomas"],
+  ["maximo","máximo"],["minimo","mínimo"],["unico","único"],
+  ["especifico","específico"],["genetico","genético"],["organico","orgánico"],
+  ["clinico","clínico"],["critico","crítico"],["cronico","crónico"],
+  ["psicotico","psicótico"],["epileptico","epiléptico"],["neuropatico","neuropático"],
+  ["farmaceutica","farmacéutica"],["farmaceutico","farmacéutico"],["periodo","período"],
+  ["ansiolitica","ansiolítica"],["ansiolitico","ansiolítico"],
+  ["atipico","atípico"],["tipico","típico"],
+  ["topico","tópico"],["osea","ósea"],["oseo","óseo"],
+  ["practico","práctico"],["tetrico","tétrico"],
+  ["liquido","líquido"],["solido","sólido"],
+  ["rapido","rápido"],
+
+  ["al dia","al día"],["cada dia","cada día"],
+
+  ["sueno","sueño"],["suenos","sueños"],["migrana","migraña"],
+  ["compania","compañía"],["acompanar","acompañar"],["montana","montaña"],
+
+  ["acido","ácido"],["despues","después"],["acne","acné"],
+  ["proposito","propósito"],["estimulo","estímulo"],
+  ["panico","pánico"],["vertigo","vértigo"],["sindrome","síndrome"],
+  ["Meniere","Ménière"],["trigemino","trigémino"],["tension","tensión"],
+  ["digestion","digestión"],
+
+  ["Forma Farmaceutica","forma farmacéutica"],
+  ["Forma Farmacéutica","forma farmacéutica"],
+
+  ["Comprimidos Recubiertos","comprimidos recubiertos"],
+  ["Comprimidos Recubierto","comprimidos recubiertos"],
+  ["comprimidos recubier","comprimidos recubiertos"],
+
+  ["capsulas","cápsulas"],
+  [" Gotas "," gotas "],[" Ampollas "," ampollas "],
+  ["recubier..","recubiertos"],["recubier.","recubiertos"],
+
+  ["DepakeneJarabeAcido","Depakene Jarabe Ácido"],
+  ["Soluci+Â¦n","Solución"],
+  ["+¡a","ía"],["+¡","í"],["+í","á"],["+ü","Á"],
+  ["Ã©","é"],["Ã¡","á"],["Ã³","ó"],["Ã±","ñ"],["Ãº","ú"]
+]

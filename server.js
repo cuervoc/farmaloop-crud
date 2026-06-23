@@ -84,9 +84,11 @@ function buildQaUrl(productUrl) {
 function enrichProducts(rows) {
   return rows.map(r => ({
     ...r,
-    descripcion_intranet: (r.descripcion_intranet && r.descripcion_intranet.trim() !== '')
-      ? r.descripcion_intranet
-      : buildIntranetDescription(r),
+    descripcion_intranet: fixTextOrtografia(
+      (r.descripcion_intranet && r.descripcion_intranet.trim() !== '')
+        ? r.descripcion_intranet
+        : buildIntranetDescription(r)
+    ),
     url_qa: buildQaUrl(r.url),
   }));
 }
@@ -460,26 +462,18 @@ function applyRowStyle(row, estado) {
 
 function fixTextOrtografia(text) {
   if (!text) return text;
-  const dict = [
-    ['depresion','depresión'],['funcion','función'],['sedacion','sedación'],
-    ['prevencion','prevención'],['indicacion','indicación'],['aplicacion','aplicación'],
-    ['administracion','administración'],['duracion','duración'],
-    ['sintomas','síntomas'],['sintoma ','síntoma '],['maximo','máximo'],['minimo','mínimo'],
-    ['especifico','específico'],['clinico','clínico'],['cronico','crónico'],
-    ['psicotico','psicótico'],['epileptico','epiléptico'],['neuropatico','neuropático'],
-    ['farmaceutica','farmacéutica'],['periodo','período'],['ansiolitica','ansiolítica'],
-    ['topico','tópico'],['osea ','ósea '],[' al dia',' al día'],
-    ['sueno','sueño'],['migrana','migraña'],['panico','pánico'],
-    ['vertigo','vértigo'],['sindrome','síndrome'],['Meniere','Ménière'],
-    ['trigemino','trigémino'],['tension ','tensión '],['digestion','digestión'],
-    ['acido ','ácido '],['despues','después'],['acne','acné'],
-    ['Comprimidos Recubiertos','comprimidos recubiertos'],
-    ['capsulas','cápsulas'],[' Gotas ',' gotas '],[' Ampollas ',' ampollas '],
-    ['recubier..','recubiertos'],['recubier.','recubiertos'],
-    ['Forma Farmaceutica','Forma farmacéutica'],
-  ];
   let t = text;
-  for (const [from, to] of dict) t = t.replace(new RegExp(from, 'g'), to);
+  // Cargar diccionario (sincrónico porque es chico y solo al iniciar)
+  const DICT = require('./scripts/dict-ortografia.json');
+  for (const [from, to] of DICT) {
+    // Usar word boundary o literal según el patrón
+    if (from.startsWith(' ') || from.endsWith(' ')) {
+      t = t.split(from).join(to);
+    } else {
+      t = t.replace(new RegExp(from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), to);
+    }
+  }
+  t = t.replace(/- Principio activo: ([a-záéíóúñ])/g, (m, c) => `- Principio activo: ${c.toUpperCase()}`);
   t = t.replace(/  +/g, ' ');
   return t;
 }
