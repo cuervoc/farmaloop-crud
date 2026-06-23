@@ -43,7 +43,7 @@ function extractCantidad(name) {
   let m = name.match(/x\s*(\d+)\s*(Comprimidos?|C[áa]psulas?|Ampollas?|Sobres?|Tabletas|Grageas|Parches?|Supositorios?|[ÓO]vulos|ml|g|gr|mL|gramos)\b/i);
   if (m) {
     const unit = m[2] ? m[2].toLowerCase() : 'unidades';
-    return `x ${m[1]} ${unit}`;
+    return `${m[1]} ${unit}`;
   }
   // "30 Comprimidos" (sin x)
   m = name.match(/(\d+)\s*(Comprimidos?|C[áa]psulas?|Tabletas|Parches?)\s*(Recubiertos?|Dispersables|Prolongados?)?\s*$/i);
