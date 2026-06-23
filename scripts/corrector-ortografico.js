@@ -105,8 +105,6 @@ function fixText(text) {
   if (!text) return text;
   let t = text;
   for (const [from, to] of DICT) {
-    // Skip if already has the correct word (avoid double-fix)
-    if (t.includes(to)) continue;
     t = t.replace(new RegExp(from, 'g'), to);
     // Capitalized version if the original was capitalized
     const capFrom = from.charAt(0).toUpperCase() + from.slice(1);

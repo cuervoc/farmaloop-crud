@@ -458,6 +458,32 @@ function applyRowStyle(row, estado) {
   row.height = Math.max(row.height || 18, 28);
 }
 
+function fixTextOrtografia(text) {
+  if (!text) return text;
+  const dict = [
+    ['depresion','depresión'],['funcion','función'],['sedacion','sedación'],
+    ['prevencion','prevención'],['indicacion','indicación'],['aplicacion','aplicación'],
+    ['administracion','administración'],['duracion','duración'],
+    ['sintomas','síntomas'],['sintoma ','síntoma '],['maximo','máximo'],['minimo','mínimo'],
+    ['especifico','específico'],['clinico','clínico'],['cronico','crónico'],
+    ['psicotico','psicótico'],['epileptico','epiléptico'],['neuropatico','neuropático'],
+    ['farmaceutica','farmacéutica'],['periodo','período'],['ansiolitica','ansiolítica'],
+    ['topico','tópico'],['osea ','ósea '],[' al dia',' al día'],
+    ['sueno','sueño'],['migrana','migraña'],['panico','pánico'],
+    ['vertigo','vértigo'],['sindrome','síndrome'],['Meniere','Ménière'],
+    ['trigemino','trigémino'],['tension ','tensión '],['digestion','digestión'],
+    ['acido ','ácido '],['despues','después'],['acne','acné'],
+    ['Comprimidos Recubiertos','comprimidos recubiertos'],
+    ['capsulas','cápsulas'],[' Gotas ',' gotas '],[' Ampollas ',' ampollas '],
+    ['recubier..','recubiertos'],['recubier.','recubiertos'],
+    ['Forma Farmaceutica','Forma farmacéutica'],
+  ];
+  let t = text;
+  for (const [from, to] of dict) t = t.replace(new RegExp(from, 'g'), to);
+  t = t.replace(/  +/g, ' ');
+  return t;
+}
+
 function buildIntranetDescription(p) {
   const lab = p.laboratorio || '';
   const pres = p.presentacion_optimizada || '';
@@ -502,7 +528,9 @@ function buildIntranetDescription(p) {
   descripcion.push(`Indicaciones de embarazo y lactancia:`);
   descripcion.push(`Uso solo bajo indicaci\u00F3n m\u00E9dica. Si est\u00E1s embarazada, planeas estarlo o en per\u00EDodo de lactancia, consulta a tu m\u00E9dico antes de usar.`);
 
-  return descripcion.join('\n');
+  let result = descripcion.join('\n');
+  result = fixTextOrtografia(result); // Corrector ortográfico al vuelo
+  return result;
 }
 
 function addGroupHeader(sheet, paName, count) {
