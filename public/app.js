@@ -723,6 +723,7 @@ async function saveEdit() {
     registro_isp: editRegistro.value.trim(),
     estado: editEstado.value,
     notas: editNotas.value.trim(),
+    descripcion_intranet: editIntranetDesc.value,
   };
 
   try {
