@@ -371,6 +371,8 @@ function renderProducts() {
       const estado = sel.value;
       try {
         await api.patch(`/products/${id}/intranet`, { estado_intranet: estado });
+        const prod = state.products.find(p => p.id === id);
+        if (prod) prod.estado_intranet = estado;
         sel.classList.add('saved');
         setTimeout(() => sel.classList.remove('saved'), 1500);
         toast(`Intranet actualizado a "${estado}"`, 'success', 2000);
