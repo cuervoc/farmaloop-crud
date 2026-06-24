@@ -961,6 +961,10 @@ if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
 // ─── Keyboard nav ─────────────────────────────────────────────────────────────
 let kbIndex = -1;
 document.addEventListener('keydown', (e) => {
+  // No interceptar flechas si el foco está en un campo de texto
+  const tag = document.activeElement?.tagName;
+  if (tag === 'TEXTAREA' || tag === 'INPUT' || tag === 'SELECT') return;
+  
   const rows = productsBody.querySelectorAll('tr');
   if (rows.length === 0) return;
   if (e.key === 'ArrowDown') {
