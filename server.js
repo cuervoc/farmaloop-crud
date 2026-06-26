@@ -476,7 +476,11 @@ function fixTextOrtografia(text) {
       }
     } else {
       // Word boundary for alpha-only words
-      t = t.replace(new RegExp('\\b' + from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi'), (m) => m.toLowerCase() === from.toLowerCase() ? to : to.charAt(0).toUpperCase() + to.slice(1));
+      t = t.replace(new RegExp('\\b' + from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi'), (m) => {
+      if (m === from) return to;
+      if (m === from.toUpperCase()) return to.toUpperCase();
+      return to.charAt(0).toUpperCase() + to.slice(1);
+    });
       // Capitalized
       const capFrom = from.charAt(0).toUpperCase() + from.slice(1);
       if (capFrom !== from) {
@@ -1064,7 +1068,63 @@ app.post('/api/import/excel', upload.single('file'), async (req, res) => {
             .catch((err) => {
               results.errors++;
               results.details.push({ sheet: sheetName, sku, error: err.message });
-            });
+});
+
+// POST /api/seo/import-gsc - Importar CSV de Google Search Console
+app.post('/api/seo/import-gsc', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No se envió archivo' });
+    const csv = require('csv-parse/sync');
+    const records = csv.parse(req.file.buffer.toString('utf8'), { columns: true, skip_empty_lines: true });
+    
+    let imported = 0;
+    const today = new Date().toISOString().split('T')[0];
+    
+    for (const row of records) {
+      const page = row['Top pages'] || row['Páginas principales'] || row['Page'] || '';
+      const query = row['Top queries'] || row['Consultas principales'] || row['Query'] || '';
+      const clicks = parseInt(row['Clicks'] || row['Clics'] || '0') || 0;
+      const impressions = parseInt(row['Impressions'] || row['Impresiones'] || '0') || 0;
+      const ctr = parseFloat((row['CTR'] || '0').replace('%','').replace(',','.')) || 0;
+      const position = parseFloat((row['Position'] || row['Posición'] || '0').replace(',','.')) || 0;
+      
+      // Extraer SKU del URL
+      const skuMatch = page.match(/(\d+)\/?$/);
+      const sku = skuMatch ? skuMatch[1] : null;
+      
+      await query(
+        'INSERT INTO seo_data (page_url, query, date, clicks, impressions, ctr, position, sku) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        [page, query, today, clicks, impressions, ctr, position, sku]
+      );
+      imported++;
+    }
+    
+    res.json({ success: true, imported });
+  } catch (error) {
+    console.error('Import GSC error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/seo/stats
+app.get('/api/seo/stats', async (req, res) => {
+  try {
+    const days = parseInt(req.query.days) || 30;
+    const [totals] = await query('SELECT SUM(clicks) as clicks, SUM(impressions) as impressions, ROUND(AVG(ctr), 2) as ctr, ROUND(AVG(position), 1) as position FROM seo_data WHERE date >= DATE_SUB(CURDATE(), INTERVAL ? DAY)', [days]);
+    const [daily] = await query('SELECT date, SUM(clicks) as clicks, SUM(impressions) as impressions FROM seo_data WHERE date >= DATE_SUB(CURDATE(), INTERVAL ? DAY) GROUP BY date ORDER BY date', [days]);
+    const [topPages] = await query('SELECT page_url, SUM(clicks) as clicks, SUM(impressions) as impressions, ROUND(AVG(position), 1) as position FROM seo_data WHERE date >= DATE_SUB(CURDATE(), INTERVAL ? DAY) AND page_url != \'\' GROUP BY page_url ORDER BY clicks DESC LIMIT 10', [days]);
+    const [topQueries] = await query('SELECT query, SUM(clicks) as clicks, SUM(impressions) as impressions FROM seo_data WHERE date >= DATE_SUB(CURDATE(), INTERVAL ? DAY) AND query != \'\' GROUP BY query ORDER BY clicks DESC LIMIT 10', [days]);
+    
+    res.json({
+      totals: totals || { clicks: 0, impressions: 0, ctr: 0, position: 0 },
+      daily,
+      topPages,
+      topQueries
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
         }
       });
     });

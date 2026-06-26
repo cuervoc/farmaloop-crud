@@ -151,6 +151,9 @@ function switchTab(tab) {
   if (tab === 'objetivos' && !state.sprintData) {
     loadSprint();
   }
+  if (tab === 'seo') {
+    loadSEO();
+  }
 }
 
 // ─── Load functions ──────────────────────────────────────────────────────────
@@ -387,7 +390,60 @@ function renderPagination() {
   pageInfo.textContent = `Página ${state.page} de ${state.totalPages}`;
 }
 
-// ─── Render: Sprint ──────────────────────────────────────────────────────────
+// ─── Render: SEO ─────────────────────────────────────────────────────────────
+async function loadSEO() {
+  try {
+    const data = await api.get('/seo/stats?days=30');
+    renderSEO(data);
+  } catch (err) {
+    document.getElementById('seoClicks').textContent = 'Error';
+    console.error('SEO load error:', err);
+  }
+}
+
+function renderSEO(data) {
+  const t = data.totals || {};
+  document.getElementById('seoClicks').textContent = (t.clicks || 0).toLocaleString();
+  document.getElementById('seoImpressions').textContent = (t.impressions || 0).toLocaleString();
+  document.getElementById('seoCTR').textContent = (t.ctr || 0).toFixed(1) + '%';
+  document.getElementById('seoPosition').textContent = (t.position || 0).toFixed(1);
+
+  // Top pages
+  let ph = '<table class="mini-table"><tr><th>Página</th><th>Clics</th><th>Impr</th><th>Pos</th></tr>';
+  (data.topPages || []).forEach(p => { ph += `<tr><td>${escHtml(p.page_url?.substring(0,60) || '')}</td><td>${p.clicks}</td><td>${p.impressions}</td><td>${p.position}</td></tr>`; });
+  document.getElementById('seoTopPages').innerHTML = ph + '</table>';
+
+  // Top queries
+  let qh = '<table class="mini-table"><tr><th>Query</th><th>Clics</th><th>Impr</th></tr>';
+  (data.topQueries || []).forEach(q => { qh += `<tr><td>${escHtml(q.query?.substring(0,50) || '')}</td><td>${q.clicks}</td><td>${q.impressions}</td></tr>`; });
+  document.getElementById('seoTopQueries').innerHTML = qh + '</table>';
+
+  // Last update
+  if (data.daily && data.daily.length) {
+    document.getElementById('seoLastUpdate').textContent = 'Último dato: ' + data.daily[data.daily.length-1].date;
+  }
+}
+
+// ─── Import GSC ──────────────────────────────────────────────────────────────
+const gscFileInput = document.getElementById('gscFileInput');
+const btnImportGSC = document.getElementById('btnImportGSC');
+
+btnImportGSC?.addEventListener('click', () => gscFileInput.click());
+gscFileInput?.addEventListener('change', async () => {
+  const file = gscFileInput.files[0];
+  if (!file) return;
+  const formData = new FormData();
+  formData.append('file', file);
+  try {
+    const res = await fetch('/api/seo/import-gsc', { method: 'POST', body: formData });
+    const data = await res.json();
+    toast(`Importados ${data.imported} registros de GSC`, 'success');
+    loadSEO();
+  } catch (err) {
+    toast('Error al importar: ' + err.message, 'error');
+  }
+  gscFileInput.value = '';
+});
 function renderSprint() {
   const d = state.sprintData;
   const currentWeek = d.currentWeek;

@@ -73,6 +73,7 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
           Objetivos
         </button>
+        <button class="nav-tab" data-tab="seo">📊 SEO</button>
       </nav>
 
       <!-- ==================== VIEW: CATÁLOGO ==================== -->
@@ -180,7 +181,7 @@
 
             <div class="form-row form-full">
               <label>Descripción Intranet (copiar y pegar)</label>
-              <textarea id="editIntranetDesc" rows="6" placeholder="Texto completo para pegar en la intranet..."></textarea>
+              <textarea id="editIntranetDesc" rows="22" placeholder="Texto completo para pegar en la intranet..."></textarea>
             </div>
 
             <div class="edit-actions">
@@ -241,6 +242,40 @@
         <div id="objetivosContent">
           <div class="loading">Cargando objetivos...</div>
         </div>
+
+        <div id="view-seo" class="view">
+        <div id="seoContent" class="tab-content">
+          <div class="seo-header">
+            <h2>📊 SEO — Google Search Console</h2>
+            <div class="seo-actions">
+              <span id="seoLastUpdate" class="seo-date"></span>
+              <button id="btnImportGSC" class="btn btn-outline btn-sm">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Importar CSV de GSC
+              </button>
+              <input type="file" id="gscFileInput" accept=".csv" style="display:none">
+            </div>
+          </div>
+
+          <div id="seoKPIs" class="seo-kpis">
+            <div class="seo-kpi"><div class="seo-kpi-num" id="seoClicks">—</div><div class="seo-kpi-label">Clics</div></div>
+            <div class="seo-kpi"><div class="seo-kpi-num" id="seoImpressions">—</div><div class="seo-kpi-label">Impresiones</div></div>
+            <div class="seo-kpi"><div class="seo-kpi-num" id="seoCTR">—</div><div class="seo-kpi-label">CTR</div></div>
+            <div class="seo-kpi"><div class="seo-kpi-num" id="seoPosition">—</div><div class="seo-kpi-label">Posición media</div></div>
+          </div>
+
+          <div class="seo-tables">
+            <div>
+              <h3>🔝 Top 10 páginas</h3>
+              <div id="seoTopPages" class="seo-table"></div>
+            </div>
+            <div>
+              <h3>🔝 Top 10 keywords</h3>
+              <div id="seoTopQueries" class="seo-table"></div>
+            </div>
+          </div>
+        </div>
+      </div>
       </div>
 
       </div>

@@ -16,7 +16,11 @@ function fixText(text) {
     if (/[^a-záéíóúñü]/i.test(from)) {
       t = t.split(from).join(to);
     } else {
-      t = t.replace(new RegExp('\\b' + from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi'), (m) => m.toLowerCase() === from.toLowerCase() ? to : to.charAt(0).toUpperCase() + to.slice(1));
+      t = t.replace(new RegExp('\\b' + from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi'), (m) => {
+      if (m === from) return to;
+      if (m === from.toUpperCase()) return to.toUpperCase();
+      return to.charAt(0).toUpperCase() + to.slice(1);
+    });
     }
     const capFrom = from.charAt(0).toUpperCase() + from.slice(1);
     if (capFrom !== from && !/[^a-záéíóúñü]/i.test(from)) {

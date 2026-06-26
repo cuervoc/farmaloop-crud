@@ -2,7 +2,7 @@ const mysql = require('mysql2/promise');
 const pool = mysql.createPool({host:'db',port:3306,user:'seo_user',password:'seo_pass_2026',database:'farmaloop_seo'});
 const DICT = require('./dict-ortografia.json');
 
-const CATS = ['Control de Peso','Diabetes','Colesterol','Salud Mental','Anticonceptivos y Hormonas','Fertilidad','Hipertensión','Sistema Digestivo','Huesos y Articulaciones','Bienestar Sexual','Sistema Inmune','Omega 3','Probióticos'];
+const CATS = ['Control de Peso','Diabetes','Colesterol','Salud Mental','Anticonceptivos y Hormonas','Fertilidad','Hipertensión','Sistema Digestivo','Huesos y Articulaciones','Bienestar Sexual','Sistema Inmune','Omega 3','Probióticos','Todo en Medicamentos'];
 const PH = CATS.map(() => '?').join(',');
 
 function fixText(text) {
@@ -12,7 +12,11 @@ function fixText(text) {
     if (from.startsWith(' ') || from.endsWith(' ')) {
       t = t.split(from).join(to);
     } else if (/^[a-záéíóúñ]/i.test(from)) {
-      t = t.replace(new RegExp('\\b' + from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi'), (m) => m.toLowerCase() === from ? to : to.charAt(0).toUpperCase() + to.slice(1));
+      t = t.replace(new RegExp('\\b' + from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi'), (m) => {
+      if (m === from) return to;
+      if (m === from.toUpperCase()) return to.toUpperCase();
+      return to.charAt(0).toUpperCase() + to.slice(1);
+    });
     } else {
       t = t.replace(new RegExp(from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), to);
     }

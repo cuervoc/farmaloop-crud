@@ -1593,3 +1593,20 @@ tr.kb-active {
   .filters { flex-direction: column; }
   .col-category { display: none; }
 }
+
+/* ─── SEO Tab ──────────────────────────────────────────────────────────────── */
+.seo-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.seo-header h2 { font-size: 1.1rem; }
+.seo-actions { display: flex; gap: 8px; align-items: center; }
+.seo-date { font-size: 0.75rem; color: var(--text-muted); }
+.seo-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+.seo-kpi { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-align: center; }
+.seo-kpi-num { font-size: 1.6rem; font-weight: 700; color: var(--primary); }
+.seo-kpi-label { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; text-transform: uppercase; letter-spacing: .04em; }
+.seo-tables { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.seo-tables h3 { font-size: 0.85rem; margin-bottom: 8px; }
+.seo-table { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.mini-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+.mini-table th { background: var(--border-light); padding: 6px 10px; text-align: left; font-weight: 600; color: var(--text-muted); }
+.mini-table td { padding: 5px 10px; border-top: 1px solid var(--border-light); }
+.mini-table tr:hover td { background: var(--primary-soft); }
