@@ -31,6 +31,7 @@ const CATEGORIAS_BLOQUE1 = [
   'Anticonceptivos y Hormonas', 'Fertilidad', 'Hipertensión',
   'Sistema Digestivo', 'Huesos y Articulaciones', 'Bienestar Sexual',
   'Sistema Inmune', 'Omega 3', 'Probióticos',
+  'Vitaminas y Minerales', 'Vitaminas', 'Suplementos',
 ];
 const CAT_IN_CLAUSE = () => CATEGORIAS_BLOQUE1.map(() => '?').join(',');
 

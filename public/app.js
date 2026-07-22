@@ -838,6 +838,10 @@ editMetaDesc.addEventListener('input', updateCharCounts);
 btnSaveEdit.addEventListener('click', saveEdit);
 btnCancelEdit.addEventListener('click', closeEdit);
 btnCloseEdit.addEventListener('click', closeEdit);
+document.getElementById('btnCopyIntranet')?.addEventListener('click', () => {
+  const btn = document.getElementById('btnCopyIntranet');
+  copyText(editIntranetDesc.value, btn, state.editingProduct?.sku);
+});
 btnFlagError?.addEventListener('click', toggleError);
 document.getElementById('editOverlay')?.addEventListener('click', closeEditIfBackdrop);
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && state.editing) closeEdit(); });
